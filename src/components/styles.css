@@ -1,0 +1,17 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* You can also add custom styles here. For example: */
+body {
+  background-color: #f3f4f6;
+}
+
+/* Or customize some elements */
+.line-through {
+  text-decoration: line-through;
+}
+.box{
+  width: 600px;
+  height: 900px;
+}

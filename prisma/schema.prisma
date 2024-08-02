@@ -1,0 +1,124 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             Int              @id @default(autoincrement())
+  email          String           @unique
+  username       String           @unique
+  password       String
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  auctions       Auction[]
+  auctionHistory AuctionHistory[]
+  bids           BidList[]
+  profile        Profile?
+  watchlist      Watchlist[]
+  products       Products[]       // Relation to Products
+  checkouts      Checkout[]       // Relation to Checkout
+}
+
+model Products {
+  id                Int         @id @default(autoincrement())
+  title             String
+  price             Float
+  description       String
+  url               String
+  weight            String
+  createdAt         DateTime    @default(now())
+  category          String
+  createdByUsername String
+  auctions          Auction[]
+  watchlists        Watchlist[]
+  createdBy         User        @relation(fields: [createdByUsername], references: [username])
+
+  @@index([createdByUsername])
+}
+
+model Auction {
+  auctionId       Int              @id @default(autoincrement())
+  productId       Int
+  startBid        Float
+  auctionDeadline DateTime
+  currentBid      Float
+  createdTime     DateTime         @default(now())
+  userUsername    String
+  product         Products         @relation(fields: [productId], references: [id])
+  user            User             @relation(fields: [userUsername], references: [username])
+  history         AuctionHistory[]
+  bidList         BidList[]
+  checkouts       Checkout[]       // Relation to Checkout
+
+  @@index([productId])
+  @@index([userUsername])
+}
+
+model Profile {
+  id          Int      @id @default(autoincrement())
+  firstName   String?
+  lastName    String?
+  dateOfBirth DateTime?
+  address     String?
+  url         String?
+  gender      String?
+  bio         String?
+  facebook    String?
+  twitter     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userUsername String  @unique
+  user        User     @relation(fields: [userUsername], references: [username])
+}
+
+model AuctionHistory {
+  id             Int      @id @default(autoincrement())
+  auctionId      Int
+  bidAmount      Float
+  bidTime        DateTime @default(now())
+  userUsername   String
+  auction        Auction  @relation(fields: [auctionId], references: [auctionId])
+  user           User     @relation(fields: [userUsername], references: [username])
+
+  @@index([auctionId])
+  @@index([userUsername])
+}
+
+model BidList {
+  id             Int      @id @default(autoincrement())
+  auctionId      Int
+  bidAmount      Float
+  bidTime        DateTime @default(now())
+  userUsername   String
+  auction        Auction  @relation(fields: [auctionId], references: [auctionId])
+  user           User     @relation(fields: [userUsername], references: [username])
+
+  @@index([auctionId])
+  @@index([userUsername])
+}
+
+model Watchlist {
+  id             Int      @id @default(autoincrement())
+  productId      Int
+  createdAt      DateTime @default(now())
+  userUsername   String
+  product        Products @relation(fields: [productId], references: [id])
+  user           User     @relation(fields: [userUsername], references: [username])
+
+  @@unique([userUsername, productId])
+}
+
+model Checkout {
+  id          Int      @id @default(autoincrement())
+  username    String
+  auctionId   Int      @unique
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [username], references: [username])
+  auction     Auction  @relation(fields: [auctionId], references: [auctionId])
+
+  @@index([username])
+}
